@@ -1,29 +1,21 @@
 ---@diagnostic disable: undefined-global
 
-local set = vim.opt
+vim.opt.cursorline = true
+vim.opt.termguicolors = true
+vim.opt.number = true
+vim.opt.scrolloff = 8
+vim.opt.laststatus = 0
+vim.opt.icon = true
+vim.opt.expandtab = true
+vim.opt.autoindent = true
+vim.opt.breakindent = true
+vim.opt.smartindent = true
+vim.opt.shiftwidth = 4
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.incsearch = true
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+vim.opt.equalalways = true
 
--- general
-set.cursorline = true
-set.termguicolors = true
-set.number = true
-set.scrolloff = 8
-set.laststatus = 0
-set.icon = true
-
--- text
-set.expandtab = true
 vim.cmd("autocmd Filetype make setlocal noexpandtab")
-set.autoindent = true
-set.breakindent = true
-set.smartindent = true
-set.shiftwidth = 4
-
--- searching
-set.ignorecase = true
-set.smartcase = true
-set.incsearch = true
-
--- window managment
-set.splitright = true
-set.splitbelow = true
-set.equalalways = true

@@ -3,7 +3,7 @@
 myshi=$(ls -av1 -I "install.sh")
 
 for i in $myshi; do
-    if [[ $i != "." && $i != ".." ]]; then
+    if [[ $i != "." && $i != ".." && $i != "README.md" && $i != ".git" && $i != "install.sh" ]]; then
         if [[ -d "./$i" ]]; then
 
             if [[ -L "$HOME/.config/$i" ]]; then

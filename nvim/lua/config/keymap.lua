@@ -31,7 +31,7 @@ vim.api.nvim_set_keymap("n", "<C-q>", "", {
     noremap = true,
     silent = true,
     callback = function()
-        local s = pcall(function() vim.cmd("close") end) -- try closing window first
+        local s = pcall(function() vim.cmd("close") end) -- try closing window first (did it when i was a noob, didn't know the difference between a window and a buffer)
         if not s then
             s = pcall(function() vim.cmd("bd") end)      -- close buffer if it is the last window
             if not s then print("Unsaved Buffer, use 'bd!' to force quit") end
@@ -58,8 +58,6 @@ vim.api.nvim_set_keymap("n", "<Leader>.", "", {
     noremap = true,
     callback = function()
         local ft = vim.bo.filetype
-        if ft == 'python' then
-            vim.cmd('w | !python %')
-        end
+        if ft == 'python' then vim.cmd('w | !python %') end
     end
 })
