@@ -6,9 +6,9 @@ alias ff="fzf -m --preview='bat --color always --style='numbers,grid,changes' --
 alias tree="if [[ -e './mu/tree' ]];then ./mu/tree | bat; else tree -a -C --dirsfirst -I \".git\" | bat; fi"
 alias bat="bat --color always --style='numbers,grid,changes' --theme=Dracula"
 alias ls="ls --color=auto -v --group-directories-first -1"
+alias getrand256="cat /dev/urandom | head -c 256 | xxd -p | awk '{printf \"%s\", \$0} END {print \"\"}'"
 alias v="if [[ -e './mu/v' ]];then ./mu/v; else nvim; fi"
 alias pacman="sudo pacman --color always"
-alias getrand256="cat /dev/urandom | head -c 256 | hexdump" # ??
 alias pq="sudo pacman -Q --color never"
 alias glog="git log --oneline --graph"
 alias wget-here="wget -q -O -"

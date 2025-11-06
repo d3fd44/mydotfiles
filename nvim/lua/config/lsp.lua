@@ -17,3 +17,27 @@ vim.lsp.config['clangd'] = {
     capabilities = capabilities,
 }
 vim.lsp.enable('clangd')
+
+vim.lsp.config['pyright-langserver'] = {
+    cmd = { 'pyright-langserver', '--stdio' },
+    filetypes = { 'py', '.py' },
+    capabilities = capabilities,
+}
+vim.lsp.enable('pyright-langserver')
+
+-- local on_attach = function(client, bufnr)
+--     -- Enable LSP features, like completion, go-to-definition, etc.
+--     -- You can add key mappings here if desired
+--     vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gd', '<Cmd>lua vim.lsp.buf.definition()<CR>',
+--         { noremap = true, silent = true })
+--     vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gr', '<Cmd>lua vim.lsp.buf.references()<CR>',
+--         { noremap = true, silent = true })
+--     vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gh', '<Cmd>lua vim.lsp.buf.hover()<CR>',
+--         { noremap = true, silent = true })
+-- end
+
+-- vim.lsp.start({
+--     name = "pyright",
+--     cmd = { "pyright" },
+--     -- on_attach = on_attach,
+-- })
