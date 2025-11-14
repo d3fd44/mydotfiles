@@ -7,9 +7,9 @@ return {
     opts = {
         signature = { enabled = true },
 
-        keymap = { -- see ':h blink-cmp-config-keymap'
+        keymap = {          -- see ':h blink-cmp-config-keymap'
             preset = 'default',
-            ['<C-k>'] = {},
+            ['<C-k>'] = {}, -- bc i got C-k mapped to <UP> in insert mode
             ['<C-v>'] = { 'show_signature', 'hide_signature', 'fallback' },
         },
         appearance = { nerd_font_variant = 'mono' },

@@ -1,9 +1,5 @@
-# themes
 font-size = 14
-# theme = TokyoNight Night
-# theme = Gruvbox Dark Hard
-# theme = Kanagawa Wave
-theme = Nightfox
+theme = TokyoNight Night
 cursor-style = block
 cursor-style-blink = false
 window-decoration = false
@@ -13,7 +9,6 @@ background-blur = true
 background-opacity = 0.95
 fullscreen
 
-# options
 mouse-hide-while-typing
 shell-integration = zsh
 app-notifications = false
