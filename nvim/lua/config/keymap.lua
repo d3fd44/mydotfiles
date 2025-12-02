@@ -10,6 +10,8 @@ vim.keymap.set("i", "<C-h>", "<left>", { noremap = true })
 vim.keymap.set("i", "<C-j>", "<down>", { noremap = true })
 vim.keymap.set("i", "<C-k>", "<up>", { noremap = true })
 vim.keymap.set("i", "<C-l>", "<right>", { noremap = true })
+vim.keymap.set("i", "<C-b>", "<C-o>b", { noremap = true })
+vim.keymap.set("i", "<C-f>", "<C-o>w", { noremap = true })
 
 vim.keymap.set("n", "<A-]>", "<cmd>bnext<CR>")
 vim.keymap.set("n", "<A-[>", "<cmd>bprevious<CR>")
@@ -32,14 +34,11 @@ vim.api.nvim_set_keymap("n", "<C-q>", "", {
     end,
 })
 
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
-
 vim.keymap.set("x", "<Leader>p", "\"_dP")
+
 vim.keymap.set({ "n", "v" }, "<Leader>d", "\"_d")
 vim.keymap.set("n", "<leader>r", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
--- terminal
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
@@ -49,6 +48,12 @@ vim.api.nvim_set_keymap("n", "<Leader>.", "", {
     noremap = true,
     callback = function()
         local ft = vim.bo.filetype
-        if ft == 'python' then vim.cmd('w | !python %') end
+        if ft == 'python' then
+            vim.cmd('w | !python %')
+        elseif ft == 'javascript' then
+            vim.cmd('w | !node %')
+        elseif ft == 'lua' then
+            vim.cmd('w | so %')
+        end
     end
 })
