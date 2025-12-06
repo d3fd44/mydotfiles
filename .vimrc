@@ -1,8 +1,8 @@
 let g:mapleader = " "
 
-colorscheme retrobox
+colorscheme sorbet
 
-set nu scrolloff=10 cursorline
+set nu rnu scrolloff=10 cursorline
 
 nn <Leader>e :Ex<CR>
 nn <M-]> :bnext<CR>
