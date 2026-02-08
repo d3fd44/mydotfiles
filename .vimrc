@@ -1,10 +1,11 @@
-vim9cmd g:mapleader = " "
+vim9script
 
+g:mapleader = " "
 
 set number
-set relativenumber 
+set relativenumber
 set cursorline
-set scrolloff=10 
+set scrolloff=10
 set shiftwidth=4
 set tabstop=4
 set expandtab
@@ -17,22 +18,19 @@ set mouse=a
 set background=dark
 set termguicolors
 
+
 augroup filetypeRelatedActions
     autocmd!
     autocmd FileType make setlocal noexpandtab
 augroup END
 
-
-nnoremap <Leader>e :Ex<CR>
-nnoremap <C-q>     :bd<CR>
-nnoremap n       :bnext<CR> " <A-n>
-nnoremap p       :bprev<CR> " <A-p>
-nnoremap <Esc>     :nohl<CR>
-
-
 augroup highlightYankedText
     autocmd!
-    autocmd TextYankPost * call FlashYankedText()
+    autocmd TextYankPost * {
+        if (v:event['operator'] == 'y')
+            call FlashYankedText()
+        endif
+    }
 augroup END
 
 augroup preserveColors
@@ -40,35 +38,54 @@ augroup preserveColors
     autocmd ColorScheme * highlight FlashYank guifg=black guibg=#4cffd0
 augroup END
 
-function! FlashYankedText()
+
+def FlashYankedText(): void
     if (!exists('g:yankedTextMatches'))
-        let g:yankedTextMatches = []
+        g:yankedTextMatches = []
     endif
 
-    let matchId = matchadd('FlashYank', ".\\%>'\\[\\_.*\\%<']..")
-    let windowId = winnr()
+    var matchId = matchadd('FlashYank', ".\\%>'\\[\\_.*\\%<']..")
+    var windowId = winnr()
 
     call add(g:yankedTextMatches, [windowId, matchId])
     call timer_start(150, 'DeleteTemporaryMatch')
-endfunction
+enddef
 
-function! DeleteTemporaryMatch(timerId)
+def DeleteTemporaryMatch(timerId: number): void
      while !empty(g:yankedTextMatches)
-        let match = remove(g:yankedTextMatches, 0)
-        let windowID = match[0]
-        let matchID = match[1]
+        var match = remove(g:yankedTextMatches, 0)
+        var windowID = match[0]
+        var matchID = match[1]
         try
             call matchdelete(matchID, windowID)
+        catch
+            echo "invalid matchID!"
         endtry
     endwhile
-endfunction
+enddef
+
+def Surround(): void
+    echo "Enter surround char..."
+    var pairs = {'(': ')', '{': '}', '[': ']', '<': '>'}
+    var lhc = nr2char(getchar())
+    var rhc = pairs->get(lhc, lhc)
+    execute "normal! `>" .. (visualmode() ==# "V" ? "g_" : "") .. "a" .. rhc .. "\<Esc>`<" .. (visualmode() ==# "V" ? "g^" : "") .. "i" .. lhc .. "\<Esc>"
+enddef
+
+
+nnoremap <Leader>e :Ex<CR>
+nnoremap <C-q>     :bd<CR>
+nnoremap n       :bnext<CR> " <A-n>
+nnoremap p       :bprev<CR> " <A-p>
+nnoremap <Esc>     :nohl<CR>
+xnoremap <Leader>s  <Esc><ScriptCmd>Surround()<CR>
 
 call plug#begin()
 Plug 'ghifarit53/tokyonight-vim'
 call plug#end()
 
-let g:tokyonight_style = 'night'
-let g:tokyonight_enable_italic = 1
+g:tokyonight_style = 'night'
+g:tokyonight_enable_italic = 1
 colorscheme tokyonight
 
 syntax on
