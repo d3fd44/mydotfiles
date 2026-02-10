@@ -64,21 +64,46 @@ def DeleteTemporaryMatch(timerId: number): void
     endwhile
 enddef
 
-def Surround(): void
+
+def SetOp(op: string): string
+    if (op == "nsurround")
+        &operatorfunc = function('SurroundOp', ['n'])
+    elseif (op == "vsurround")
+        &operatorfunc = function('SurroundOp', ['v'])
+    endif
+    return 'g@'
+enddef
+
+
+def SurroundOp(mode: any, type: any): void
     echo "Enter surround char..."
     var pairs = {'(': ')', '{': '}', '[': ']', '<': '>'}
     var lhc = nr2char(getchar())
     var rhc = pairs->get(lhc, lhc)
-    execute "normal! `>" .. (visualmode() ==# "V" ? "g_" : "") .. "a" .. rhc .. "\<Esc>`<" .. (visualmode() ==# "V" ? "g^" : "") .. "i" .. lhc .. "\<Esc>"
+    if (mode == 'n')
+        if (type == 'line')
+            execute "normal! `[`]" .. "A" .. rhc .. "\<Esc>``I" .. lhc .. "\<Esc>"
+        elseif (type == 'char')
+            execute "normal! `[`]" .. "a" .. rhc .. "\<C-o>``" .. lhc .. "\<Esc>"
+        endif
+    elseif (mode == 'v')
+        if (type == 'line')
+            execute "normal! `<`>" .. "A" .. rhc .. "\<Esc>``I" .. lhc .. "\<Esc>"
+        elseif (type == 'char')
+            execute "normal! `<`>" .. "a" .. rhc .. "\<C-o>``" .. lhc .. "\<Esc>"
+        endif
+    endif
 enddef
 
 
+map      Y         y$
 nnoremap <Leader>e :Ex<CR>
 nnoremap <C-q>     :bd<CR>
 nnoremap n       :bnext<CR> " <A-n>
 nnoremap p       :bprev<CR> " <A-p>
 nnoremap <Esc>     :nohl<CR>
-xnoremap <Leader>s  <Esc><ScriptCmd>Surround()<CR>
+nnoremap <expr> gs SetOp("nsurround")
+xnoremap <expr> gs SetOp("vsurround")
 
 call plug#begin()
 Plug 'ghifarit53/tokyonight-vim'
