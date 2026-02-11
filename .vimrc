@@ -2,6 +2,9 @@ vim9script
 
 g:mapleader = " "
 
+
+
+## Options
 set number
 set relativenumber
 set cursorline
@@ -20,12 +23,49 @@ set mouse=a
 set background=dark
 set termguicolors
 
-
 augroup filetypeRelatedActions
     autocmd!
     autocmd FileType make setlocal noexpandtab
 augroup END
 
+
+
+## Custom Operators
+def SetOp(op: string, mode: string): string
+    if (op == "surround")
+        &operatorfunc = function('SurroundOp', [mode, v:count1])
+    endif
+    return 'g@'
+enddef
+
+def SurroundOp(mode: string, count: number, type: any): void
+    echo "Enter surround char..."
+    var lhc = nr2char(getchar())
+
+    if lhc == nr2char(27) | return | endif
+
+    var rhc = {'(': ')', '{': '}', '[': ']', '<': '>'}->get(lhc, lhc)
+    var lhcmd = $"``{type == 'line' ? "^i" : "i"}{repeat(lhs, count)}"
+    var rhcmd = $"{mode == 'n' ? '`[`]' : '`<`>'}{type == 'line' ? "g_a" : "a"}{repeat(rhs, count)}"
+
+    execute $"normal! {rhcmd}\<Esc>{lhcmd}\<Esc>"
+enddef
+
+
+
+## Mappings
+map      Y          y$
+nnoremap <Leader>e :Ex<CR>
+nnoremap <C-q>     :bd<CR>
+nnoremap n       :bnext<CR> " <A-n>
+nnoremap p       :bprev<CR> " <A-p>
+nnoremap <Esc>     :nohl<CR>
+nnoremap <expr> gs  SetOp("surround", 'n') .. '<Esc>g@'
+xnoremap <expr> gs  SetOp("surround", 'v')
+
+
+
+## Colors
 augroup highlightYankedText
     autocmd!
     autocmd TextYankPost * {
@@ -65,47 +105,6 @@ def DeleteTemporaryMatch(timerId: number): void
         endtry
     endwhile
 enddef
-
-
-def SetOp(op: string, count: number): string
-    if (op == "nsurround")
-        &operatorfunc = function('SurroundOp', ['n', count, 0])
-    elseif (op == "vsurround")
-        &operatorfunc = function('SurroundOp', ['v', count, 0])
-    endif
-    return 'g@'
-enddef
-
-
-def SurroundOp(mode: string, count: number, break: bool, type: any): void
-    echo "Enter surround char..."
-    var pairs = {'(': ')', '{': '}', '[': ']', '<': '>'}
-    var lhc = nr2char(getchar())
-    var rhc = pairs->get(lhc, lhc)
-    if (mode == 'n')
-        if (type == 'line')
-            execute "normal! `[`]g_" .. count .. "a" .. rhc .. "\<Esc>``^" .. count .. "i" .. lhc .. "\<Esc>"
-        elseif (type == 'char')
-            execute "normal! `[`]" .. count .. "a" .. rhc .. "\<Esc>``" .. count .. "i" .. lhc .. "\<Esc>"
-        endif
-    elseif (mode == 'v')
-        if (type == 'line')
-            execute "normal! `<`>g_" .. count .. "a" .. rhc .. "\<Esc>``^" .. count .. "i" .. lhc .. "\<Esc>"
-        elseif (type == 'char')
-            execute "normal! `<`>" .. count .. "a" .. rhc .. "\<Esc>``" .. count .. "i" .. lhc .. "\<Esc>"
-        endif
-    endif
-enddef
-
-
-map      Y         y$
-nnoremap <Leader>e :Ex<CR>
-nnoremap <C-q>     :bd<CR>
-nnoremap n       :bnext<CR> " <A-n>
-nnoremap p       :bprev<CR> " <A-p>
-nnoremap <Esc>     :nohl<CR>
-nnoremap <expr> gs SetOp("nsurround", v:count1) .. '<Esc>g@'
-xnoremap <expr> gs SetOp("vsurround", v:count1)
 
 call plug#begin()
 Plug 'ghifarit53/tokyonight-vim'
