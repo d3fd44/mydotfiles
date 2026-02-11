@@ -1,6 +1,8 @@
-my ugly dotfiles for Neovim, zsh, tmux and some others.
+My stupid dotfiles for [Neo]vim, zsh, and some other tools.
 --------------
-cd into repo directory and `'./install.sh'`
+just hit `'./install'`
 
-\- "why don't you use GNU stow?"\
-= "we got stow at home."
+\- "Why don't you use GNU stow?"\
+= "We got stow at home."
+
+**The stow at home:**

@@ -45,8 +45,8 @@ def SurroundOp(mode: string, count: number, type: any): void
     if lhc == nr2char(27) | return | endif
 
     var rhc = {'(': ')', '{': '}', '[': ']', '<': '>'}->get(lhc, lhc)
-    var lhcmd = $"``{type == 'line' ? "^i" : "i"}{repeat(lhs, count)}"
-    var rhcmd = $"{mode == 'n' ? '`[`]' : '`<`>'}{type == 'line' ? "g_a" : "a"}{repeat(rhs, count)}"
+    var lhcmd = $"``{type == 'line' ? "^i" : "i"}{repeat(lhc, count)}"
+    var rhcmd = $"{mode == 'n' ? '`[`]' : '`<`>'}{type == 'line' ? "g_a" : "a"}{repeat(rhc, count)}"
 
     execute $"normal! {rhcmd}\<Esc>{lhcmd}\<Esc>"
 enddef
