@@ -10,7 +10,9 @@ set shiftwidth=4
 set tabstop=4
 set expandtab
 set autoindent
+set ignorecase
 set smartindent
+set smartcase
 set incsearch
 set hlsearch
 set clipboard=unnamedplus
@@ -65,32 +67,32 @@ def DeleteTemporaryMatch(timerId: number): void
 enddef
 
 
-def SetOp(op: string): string
+def SetOp(op: string, count: number): string
     if (op == "nsurround")
-        &operatorfunc = function('SurroundOp', ['n'])
+        &operatorfunc = function('SurroundOp', ['n', count, 0])
     elseif (op == "vsurround")
-        &operatorfunc = function('SurroundOp', ['v'])
+        &operatorfunc = function('SurroundOp', ['v', count, 0])
     endif
     return 'g@'
 enddef
 
 
-def SurroundOp(mode: any, type: any): void
+def SurroundOp(mode: string, count: number, break: bool, type: any): void
     echo "Enter surround char..."
     var pairs = {'(': ')', '{': '}', '[': ']', '<': '>'}
     var lhc = nr2char(getchar())
     var rhc = pairs->get(lhc, lhc)
     if (mode == 'n')
         if (type == 'line')
-            execute "normal! `[`]" .. "A" .. rhc .. "\<Esc>``I" .. lhc .. "\<Esc>"
+            execute "normal! `[`]g_" .. count .. "a" .. rhc .. "\<Esc>``^" .. count .. "i" .. lhc .. "\<Esc>"
         elseif (type == 'char')
-            execute "normal! `[`]" .. "a" .. rhc .. "\<C-o>``" .. lhc .. "\<Esc>"
+            execute "normal! `[`]" .. count .. "a" .. rhc .. "\<Esc>``" .. count .. "i" .. lhc .. "\<Esc>"
         endif
     elseif (mode == 'v')
         if (type == 'line')
-            execute "normal! `<`>" .. "A" .. rhc .. "\<Esc>``I" .. lhc .. "\<Esc>"
+            execute "normal! `<`>g_" .. count .. "a" .. rhc .. "\<Esc>``^" .. count .. "i" .. lhc .. "\<Esc>"
         elseif (type == 'char')
-            execute "normal! `<`>" .. "a" .. rhc .. "\<C-o>``" .. lhc .. "\<Esc>"
+            execute "normal! `<`>" .. count .. "a" .. rhc .. "\<Esc>``" .. count .. "i" .. lhc .. "\<Esc>"
         endif
     endif
 enddef
@@ -102,8 +104,8 @@ nnoremap <C-q>     :bd<CR>
 nnoremap n       :bnext<CR> " <A-n>
 nnoremap p       :bprev<CR> " <A-p>
 nnoremap <Esc>     :nohl<CR>
-nnoremap <expr> gs SetOp("nsurround")
-xnoremap <expr> gs SetOp("vsurround")
+nnoremap <expr> gs SetOp("nsurround", v:count1) .. '<Esc>g@'
+xnoremap <expr> gs SetOp("vsurround", v:count1)
 
 call plug#begin()
 Plug 'ghifarit53/tokyonight-vim'
