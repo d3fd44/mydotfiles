@@ -5,15 +5,15 @@ files=(".zshrc" ".tmux.conf" ".vimrc")
 
 for i in ${dirs[@]}; do
     if ! [[ -d "$HOME/.config/$i" || -L "$HOME/.config/$i"  ]]; then
-        ln -s "$i" "$HOME/.config/$i" 
+	ln -s "$(pwd)/$i" "$HOME/.config/$i" 
     else
-        printf "'%s' already exists! do you want to overwrite it? (y/n)" "$HOME/.config/$i"
+        printf "'%s' already exists! do you want to overwrite it? (y/n) " "$HOME/.config/$i"
         read op
 
         case "$op" in
             'y')
                 rm -rf "$HOME/.config/$i" 
-                ln -s "$i" "$HOME/.config/$i" 
+		ln -s "$(pwd)/$i" "$HOME/.config/$i" 
             ;;
             'n') echo "skipped."
             ;;
@@ -27,13 +27,13 @@ for i in ${files[@]}; do
     if ! [[ -d "$HOME/$i" || -L "$HOME/$i"  ]]; then
         ln -s "$i" "$HOME/$i" 
     else
-        printf "'%s' already exists! do you want to overwrite it? (y/n)" "$HOME/$i"
+        printf "'%s' already exists! do you want to overwrite it? (y/n) " "$HOME/$i"
         read op
 
         case "$op" in
             'y')
                 rm -f "$HOME/$i" 
-                ln -s "$i" "$HOME/$i" 
+		ln -s "$(pwd)/$i" "$HOME/$i" 
             ;;
             'n') echo "skipped."
             ;;
