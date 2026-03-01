@@ -12,3 +12,5 @@ fullscreen
 mouse-hide-while-typing
 shell-integration = zsh
 app-notifications = false
+
+shell-integration-features = "ssh-terminfo"
