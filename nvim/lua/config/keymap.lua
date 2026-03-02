@@ -43,6 +43,7 @@ vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 vim.keymap.set("n", "<leader>e", "<cmd>Ex<CR>", { silent = true })
+vim.keymap.set("n", "<Leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", { noremap = false })
 
 vim.api.nvim_set_keymap("n", "<Leader>.", "", {
     noremap = true,
