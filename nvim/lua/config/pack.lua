@@ -8,6 +8,10 @@ vim.pack.add({
         name = "blink.cmp",
         version = 'v1'
     },
+    {
+        src = 'https://github.com/mrcjkb/rustaceanvim',
+        version = vim.version.range('^9')
+    }
 })
 
 local function load_plugins()
