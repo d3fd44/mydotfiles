@@ -2,8 +2,6 @@ vim9script
 
 g:mapleader = " "
 
-
-
 ## Options
 set number
 set relativenumber
@@ -45,8 +43,8 @@ def SurroundOp(mode: string, count: number, type: any): void
     if lhc == nr2char(27) | return | endif
 
     var rhc = {'(': ')', '{': '}', '[': ']', '<': '>'}->get(lhc, lhc)
-    var lhcmd = $"``{type == 'line' ? "^i" : "i"}{repeat(lhc, count)}"
-    var rhcmd = $"{mode == 'n' ? '`[`]' : '`<`>'}{type == 'line' ? "g_a" : "a"}{repeat(rhc, count)}"
+    var lhcmd = $"`t{type == 'line' ? "^i" : "i"}{repeat(lhc, count)}"
+    var rhcmd = $"{mode == 'n' ? '`[mt`]' : '`<mt`>'}{type == 'line' ? "g_a" : "a"}{repeat(rhc, count)}"
 
     execute $"normal! {rhcmd}\<Esc>{lhcmd}\<Esc>"
 enddef
@@ -72,7 +70,6 @@ def Align(): void
         execute $"normal! {pad}i \<Esc>j"
     endfor
 enddef
-
 
 
 ## Mappings
