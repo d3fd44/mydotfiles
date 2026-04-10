@@ -34,5 +34,4 @@ eval "$(fzf --zsh)"
 
 PROJECT_DIR="$HOME/shittyprojects"
 
-echo "" # && fastfetch
-date && echo ""
+echo && date && echo
