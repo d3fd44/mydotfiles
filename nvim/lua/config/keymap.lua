@@ -35,8 +35,8 @@ vim.api.nvim_set_keymap("n", "<C-q>", "", {
 })
 
 vim.keymap.set("x", "<Leader>p", "\"_dP")
-
 vim.keymap.set({ "n", "v" }, "<Leader>d", "\"_d")
+
 vim.keymap.set("n", "<leader>r", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
@@ -53,7 +53,7 @@ vim.api.nvim_set_keymap("n", "<Leader>.", "", {
             vim.cmd('w | !python %')
         elseif ft == 'javascript' then
             vim.cmd('w | !node %')
-        elseif ft == 'lua' then
+        elseif ft == 'lua' then -- most likely a neovim config file
             vim.cmd('w | so %')
         end
     end

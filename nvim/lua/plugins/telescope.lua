@@ -1,30 +1,18 @@
----@diagnostic disable: undefined-global
+local telescope = require("telescope")
+local tbuiltin = require("telescope.builtin")
 
-return {
-    'nvim-telescope/telescope.nvim',
-    version = '*',
-    dependencies = {
-        'nvim-lua/plenary.nvim',
-        { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
+telescope.setup({
+    pickers = {
+        find_files = { theme = "ivy" },
+        live_grep = { theme = "ivy" },
+        man_pages = { theme = "ivy" },
+        command_history = { theme = "ivy" },
+        current_buffer_fuzzy_find = { theme = "ivy" },
     },
-    config = function()
-        local telescope = require("telescope")
-        local tbuiltin = require("telescope.builtin")
+    extensions = { fzf = {} },
+})
 
-        telescope.setup({
-            pickers = {
-                find_files = { theme = "ivy" },
-                live_grep = { theme = "ivy" },
-                man_pages = { theme = "ivy" },
-                command_history = { theme = "ivy" },
-                current_buffer_fuzzy_find = { theme = "ivy" },
-            },
-            extensions = { fzf = {} },
-        })
-
-        vim.keymap.set("n", "<Leader>ff", tbuiltin.find_files)
-        vim.keymap.set("n", "<Leader>fs", tbuiltin.live_grep)
-        vim.keymap.set("n", "q:", tbuiltin.command_history, { noremap = true })
-        vim.keymap.set("n", "<Leader>m", function() tbuiltin.man_pages({ sections = { "ALL" } }) end)
-    end
-}
+vim.keymap.set("n", "<Leader>ff", tbuiltin.find_files)
+vim.keymap.set("n", "<Leader>fs", tbuiltin.live_grep)
+vim.keymap.set("n", "q:", tbuiltin.command_history, { noremap = true })
+vim.keymap.set("n", "<Leader>m", function() tbuiltin.man_pages({ sections = { "ALL" } }) end)

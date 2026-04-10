@@ -1,6 +1,5 @@
 local capabilities = require('blink.cmp').get_lsp_capabilities()
 
--- lua
 vim.lsp.config['lua_ls'] = {
     cmd = { 'lua-language-server' },
     filetypes = { 'lua' },
@@ -10,7 +9,6 @@ vim.lsp.config['lua_ls'] = {
 }
 vim.lsp.enable('lua_ls')
 
--- c/c++
 vim.lsp.config['clangd'] = {
     cmd = { 'clangd', '--background-index', '--clang-tidy', '--log=verbose', '--completion-style=detailed' },
     filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
