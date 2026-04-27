@@ -23,7 +23,11 @@ require('blink.cmp').setup({
     },
 
     -- build manually (~/.local/share/nvim/site/pack/core/opt/blink.cmp)
+    -- does not work on windows.
     fuzzy = {
+        prebuilt_binaries = {
+            force_version = "*"
+        },
         implementation = 'rust',
     },
 })

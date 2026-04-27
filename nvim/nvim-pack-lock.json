@@ -5,6 +5,10 @@
       "src": "https://github.com/saghen/blink.cmp",
       "version": "'v1'"
     },
+    "nightfox.nvim": {
+      "rev": "ba47d4b4c5ec308718641ba7402c143836f35aa9",
+      "src": "https://github.com/EdenEast/nightfox.nvim"
+    },
     "plenary.nvim": {
       "rev": "fcb3e9ac127d178b4c189088396165b3facc219e",
       "src": "https://github.com/nvim-lua/plenary.nvim"
