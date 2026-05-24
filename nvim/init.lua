@@ -6,6 +6,8 @@ require("config.keymap")
 require("config.diagnostics")
 require("config.lsp")
 
+vim.api.nvim_set_hl(0, 'LspInlayHint', { link = 'Comment' })
+
 vim.api.nvim_create_autocmd('TextYankPost', {
     callback = function()
         vim.highlight.on_yank()
