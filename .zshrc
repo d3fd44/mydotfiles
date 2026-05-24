@@ -3,17 +3,12 @@
 [[ $- != *i* ]] && return
 
 alias         ff="fzf -m --preview='bat --color always --style='numbers,grid,changes' --theme=Dracula {}' --preview-label=' preview ' --border=rounded --wrap"
-alias       tree="if [[ -e './mu/tree' ]];then ./mu/tree | bat; else tree -a -C --dirsfirst -I \".git\" | bat; fi"
-alias getrand256="cat /dev/urandom | head -c 256 | xxd -p | awk '{printf \"%s\", \$0} END {print \"\"}'"
 alias        bat="bat --color always --style='numbers,grid,changes' --theme=Dracula"
-alias         ls="ls --color=auto -v --group-directories-first -1"
-alias          v="if [[ -e './mu/v' ]];then ./mu/v; else nvim; fi"
+alias         ls="ls -l --color=auto -v --group-directories-first -1"
 alias         pq="sudo pacman -Q --color never"
 alias     pacman="sudo pacman --color always"
 alias       glog="git log --oneline --graph"
 alias       grep="grep --color=auto"
-alias  wget-here="wget -q -O -"
-alias     docker="sudo docker"
 alias        mkc="make clean"
 alias         gs="git status"
 alias        mkr="make run"
@@ -32,6 +27,46 @@ export LC_ALL=C.UTF-8
 
 eval "$(fzf --zsh)"
 
-PROJECT_DIR="$HOME/shittyprojects"
+getrandhex() {
+  local hex_len="${1:-64}"
+  local bytes_needed hex
+
+  case "$hex_len" in
+    ''|*[!0-9]*)
+      printf 'usage: %s NUM_HEX_CHARS\n' "${FUNCNAME[0]}" >&2
+      return 2
+      ;;
+    0)
+      printf '\n'
+      return 0
+      ;;
+  esac
+
+  bytes_needed=$(( (hex_len + 1) / 2 ))
+
+  generate() {
+    if command -v openssl >/dev/null 2>&1; then
+      openssl rand -hex "$bytes_needed"
+      return $?
+    fi
+    if [ -r /dev/urandom ] && command -v hexdump >/dev/null 2>&1; then
+      dd if=/dev/urandom bs="$bytes_needed" count=1 2>/dev/null | hexdump -v -e '/1 "%02x"'
+      return 0
+    fi
+    return 1
+  }
+
+  hex=$(generate) || { printf 'error: openssl or hexdump/dd required\n' >&2; return 1; }
+  hex=$(printf '%s' "$hex" | tr -d '\n')
+  printf '%s\n' "$(printf '%s' "$hex" | cut -c1-"$hex_len")"
+}
+
+
+if [ -r "$HOME/.tmuxify" ]; then
+    source "$HOME/.tmuxify"
+else
+    printf '\033[0;33mwarning:\033[0m %s does not exist\n' "$HOME/.tmuxify" >&2
+fi
+
 
 echo && date && echo

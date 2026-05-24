@@ -1,0 +1,127 @@
+#! /usr/bin/env bash
+
+getabspath() {
+  dir="$1"
+  [ -z "$dir" ] && dir="."
+  case "$dir" in
+    ~) dir="$HOME" ;;
+    ~/*) dir="${HOME}${dir#~}" ;;
+  esac
+
+  if command -v realpath >/dev/null 2>&1; then
+    realpath "$dir"
+  elif command -v readlink >/dev/null 2>&1; then
+    readlink -f "$dir" 2>/dev/null || (cd "$dir" 2>/dev/null && pwd -P)
+  else
+    (cd "$dir" 2>/dev/null && pwd -P) || { echo "path not found" >&2; return 1; }
+  fi
+}
+
+launch() {
+  PROJECT_DIR=$(getabspath "$1") || { echo "failed to get path of $1" >&2; return 1; }
+  file="$PROJECT_DIR/tmuxify.json"
+
+  [[ -f "$file" ]] || { echo "no config: $file" >&2; return 1; }
+  jq -e . "$file" >/dev/null 2>&1 || { echo "invalid json: $file" >&2; return 1; }
+
+  split_flag() {
+    case "$1" in
+      left|right) printf -- "-h" ;;
+      top|bottom) printf -- "-v" ;;
+      *) printf -- "-v" ;;
+    esac
+  }
+
+  resolve_workdir() {
+    local wd="$1"
+    if [ -z "$wd" ]; then
+      printf '%s' "$PROJECT_DIR"
+      return
+    fi
+    if [[ "$wd" = /* ]]; then
+      printf '%s' "$wd"
+    else
+      printf '%s' "$PROJECT_DIR/$wd"
+    fi
+  }
+
+  jq -c '.sessions[]' "$file" | while read -r session_json; do
+    session_name=$(jq -r '.name // empty' <<<"$session_json")
+    [ -z "$session_name" ] && session_name="session_$(date +%s%N)"
+
+    if ! tmux has-session -t "$session_name" 2>/dev/null; then
+      tmux new-session -d -s "$session_name" -n "tmuxify" >/dev/null
+    fi
+
+    jq -c '.windows[]' <<<"$session_json" | nl -ba -v0 | while read -r idx win_line; do
+      win_json=$(cut -f2- <<<"$win_line")
+      win_name=$(jq -r '.name // empty' <<<"$win_json")
+      win_name=${win_name:-window_$idx}
+
+      win_workdir_raw=$(jq -r '.workdir // empty' <<<"$win_json")
+      win_workdir=$(resolve_workdir "$win_workdir_raw")
+
+      panes_count=$(jq '.panes | length // 0' <<<"$win_json")
+      win_command=$(jq -r '.command // empty' <<<"$win_json")
+
+      if [ "$panes_count" -eq 0 ] && [ -n "$win_command" ]; then
+        tmux new-window -d -t "${session_name}" -n "$win_name" "bash -lc 'cd \"${win_workdir}\" && ${win_command}'"
+        continue
+      fi
+
+      tmux new-window -d -t "${session_name}" -n "$win_name" "bash" >/dev/null
+
+      first=1
+      jq -c '.panes[]' <<<"$win_json" | nl -ba -v0 | while read -r pidx pane_line; do
+        pane_json=$(cut -f2- <<<"$pane_line")
+        pane_name=$(jq -r '.name // empty' <<<"$pane_json")
+        pane_name=${pane_name:-pane_$pidx}
+        position=$(jq -r '.position // empty' <<<"$pane_json")
+        command=$(jq -r '.command // empty' <<<"$pane_json")
+        pane_workdir_raw=$(jq -r '.workdir // empty' <<<"$pane_json")
+        source_files_count=$(jq '.["source-file"] | length // 0' <<<"$pane_json")
+        workdir="$win_workdir"
+        if [ -n "$pane_workdir_raw" ]; then
+          workdir=$(resolve_workdir "$pane_workdir_raw")
+        elif [ "$source_files_count" -gt 0 ]; then
+          first_source=$(jq -r '.["source-file"][0]' <<<"$pane_json")
+          if [[ "$first_source" = /* ]]; then
+            workdir=$(dirname "$first_source")
+          else
+            workdir="$PROJECT_DIR/$(dirname "$first_source")"
+          fi
+        fi
+
+        if [ "$first" -eq 1 ]; then
+          target="${session_name}:${win_name}.0"
+          if [ -n "$command" ]; then
+            tmux send-keys -t "$target" "cd \"$workdir\" && ${command}" C-m
+          else
+            tmux send-keys -t "$target" "cd \"$workdir\"" C-m
+          fi
+          first=0
+        else
+          flag=$(split_flag "$position")
+          if [ -n "$command" ]; then
+            tmux split-window $flag -t "${session_name}:${win_name}" "bash -lc 'cd \"${workdir}\" && ${command}'" >/dev/null
+          else
+            tmux split-window $flag -t "${session_name}:${win_name}" "bash -lc 'cd \"${workdir}\"; exec \$SHELL'" >/dev/null
+          fi
+        fi
+      done
+
+      tmux select-layout -t "${session_name}:${win_name}" tiled >/dev/null 2>&1 || true
+    done
+
+    if tmux list-windows -t "$session_name" 2>/dev/null | grep -q '^tmuxify'; then
+      count=$(tmux list-windows -t "$session_name" 2>/dev/null | wc -l)
+      if [ "$count" -gt 1 ]; then
+        tmux kill-window -t "${session_name}::tmuxify" >/dev/null 2>&1 || true
+      else
+        first_window_name=$(tmux list-windows -t "$session_name" -F '#W' | head -n1)
+        tmux rename-window -t "${session_name}" "$first_window_name" >/dev/null 2>&1 || true
+      fi
+    fi
+  done
+}
+
