@@ -1,11 +1,10 @@
 My stupid dotfiles for \[Neo\]vim, zsh, and some other tools.
 
-the installation script creates symlinks for dotfiles under $HOME, or under .config directory for configration directories:
+the installation script creates symlinks for dotfiles under `$HOME`, or under `$HOME/.config` directory for configration directories:
 ```bash
-./install
+./install # see? no double free, no lifetime checks. as simple as that.
 ```
-- .ignore
-to **ignore** files, put patterns (glob-style) in -- guess what... a `.ignore` file (unexpected, huh?), the installation script will not create symlinks for those entries.
+- to **ignore** files, put patterns (glob-style) in -- guess what... a `.ignore` file (unexpected, huh?), the installation script will not create symlinks for those entries.
 
 ---
 
