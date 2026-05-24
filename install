@@ -1,44 +1,68 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
-dirs=("ghostty" "yazi" "nvim")
-files=(".zshrc" ".tmux.conf" ".vimrc")
+set -euo pipefail
 
-for i in ${dirs[@]}; do
-    if ! [[ -d "$HOME/.config/$i" || -L "$HOME/.config/$i" ]]; then
-    ln -s "$(pwd)/$i" "$HOME/.config/$i" 
-    else
-        printf "'%s' already exists! do you want to overwrite it? (y/n) " "$HOME/.config/$i"
-        read op
+REPO_DIR="$(pwd)"
+shopt -s nullglob dotglob
 
-        case "$op" in
-            'y')
-                rm -rf "$HOME/.config/$i" 
-                ln -s "$(pwd)/$i" "$HOME/.config/$i" 
-            ;;
-            'n') echo "skipped."
-            ;;
-            *) echo "wtf?"
-            ;;
+IGNORES=()
+if [ -r "$REPO_DIR/.ignore" ]; then
+    while IFS= read -r line; do
+        line="${line%%#*}"
+        line="${line#"${line%%[![:space:]]*}"}"
+        line="${line%"${line##*[![:space:]]}"}"
+
+        [ -z "$line" ] && continue
+
+        IGNORES+=("$line")
+    done < "$REPO_DIR/.ignore"
+fi
+
+should_ignore() {
+    local name="$1"
+    for pat in "${IGNORES[@]}"; do
+        case "$name" in
+            $pat) return 0 ;;
         esac
-    fi
-done
+    done
+    return 1
+}
 
-for i in ${files[@]}; do
-    if ! [[ -d "$HOME/$i" || -L "$HOME/$i" ]]; then
-        ln -s "$i" "$HOME/$i" 
-    else
-        printf "'%s' already exists! do you want to overwrite it? (y/n) " "$HOME/$i"
-        read op
+overwrite() {
+    local target="$1"
+    printf "'%s' exists. overwrite? (y/N) " "$target"
+    read -r ans
+    case "$ans" in
+        y|Y) return 0 ;;
+        *) return 1 ;;
+    esac
+}
 
-        case "$op" in
-            'y')
-                rm -f "$HOME/$i" 
-                ln -s "$(pwd)/$i" "$HOME/$i" 
-            ;;
-            'n') echo "skipped."
-            ;;
-            *) echo "wtf?"
-            ;;
-        esac
+link_item() {
+    local src="$1" dst="$2"
+    if [ -e "$dst" ] || [ -L "$dst" ]; then
+        if [ -L "$dst" ] && [ "$(readlink -f "$dst")" == "$(readlink -f "$src")" ]; then
+            printf "skipping (already linked): %s -> %s\n" "$dst" "$src"
+            return
+        fi
+        if overwrite "$dst"; then
+            rm -rf "$dst"
+        else
+            printf "skipped: %s\n" "$dst"
+            return
+        fi
     fi
+    ln -s "$src" "$dst"
+    printf "linked: %s -> %s\n" "$dst" "$src"
+}
+
+
+for f in "$REPO_DIR"/*; do
+    [ -e "$f" ] || continue
+
+    name=${f#$REPO_DIR/}
+    should_ignore "$name" && continue
+
+    [ -f "$f" ] && link_item "$f" "$HOME/$name"
+    [ -d "$f" ] && link_item "$f" "$HOME/.config/$name"
 done
