@@ -12,3 +12,27 @@ vim.api.nvim_create_autocmd("FileType", {
         end, { silent = true, buffer = bufnr })
     end,
 })
+
+vim.g.rustaceanvim = {
+    tools = {
+    },
+    server = {
+        on_attach = function(client, bufnr)
+            vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+            -- keymaps or like in here
+        end,
+        default_settings = {
+            ['rust-analyzer'] = {
+                inlayHints = {
+                    chainingHints = {
+                        enable = true,
+                    },
+                    typeHints = { enable = true },
+                    parameterHints = { enable = true },
+                    maxLength = 25,
+                },
+            },
+        },
+
+    },
+}
