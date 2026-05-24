@@ -16,12 +16,18 @@ vim.lsp.config['clangd'] = {
 }
 vim.lsp.enable('clangd')
 
-vim.lsp.config['pyright-langserver'] = {
+local project_root = vim.fn.getcwd()
+
+vim.lsp.config['pyright'] = {
     cmd = { 'pyright-langserver', '--stdio' },
     filetypes = { 'python' },
-    capabilities = capabilities,
+    settings = {
+        python = {
+            pythonPath = project_root .. '/.venv/bin/python'
+        }
+    }
 }
-vim.lsp.enable('pyright-langserver')
+vim.lsp.enable('pyright')
 
 vim.lsp.config['ts_ls'] = {
     cmd = { 'typescript-language-server', '--stdio' },
@@ -35,3 +41,9 @@ vim.lsp.config['tinymist'] = {
     filetypes = { "typst" },
 }
 vim.lsp.enable('tinymist')
+
+vim.lsp.config['slint-lsp'] = {
+    cmd = { "slint-lsp" },
+    filetypes = { "slint" },
+}
+vim.lsp.enable('slint-lsp')
