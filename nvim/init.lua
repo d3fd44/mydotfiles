@@ -29,3 +29,18 @@ vim.api.nvim_create_autocmd('LspAttach', {
         end
     end
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+    group = vim.api.nvim_create_augroup("NativeTreesitter", { clear = true }),
+    callback = function(args)
+        pcall(vim.treesitter.start, args.buf)
+    end,
+})
+
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = "*.slint",
+    callback = function()
+        vim.bo.filetype = "slint"
+    end,
+
+})
