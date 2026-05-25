@@ -64,6 +64,7 @@ launch() {
       panes_count=$(jq '.panes | length // 0' <<<"$win_json")
       win_command=$(jq -r '.command // empty' <<<"$win_json")
 
+
       if [ "$panes_count" -eq 0 ] && [ -n "$win_command" ]; then
         tmux new-window -d -t "${session_name}" -n "$win_name" "bash -lc 'cd \"${win_workdir}\" && ${win_command}'"
         continue
@@ -72,43 +73,46 @@ launch() {
       tmux new-window -d -t "${session_name}" -n "$win_name" "bash" >/dev/null
 
       first=1
-      jq -c '.panes[]' <<<"$win_json" | nl -ba -v0 | while read -r pidx pane_line; do
-        pane_json=$(cut -f2- <<<"$pane_line")
-        pane_name=$(jq -r '.name // empty' <<<"$pane_json")
-        pane_name=${pane_name:-pane_$pidx}
-        position=$(jq -r '.position // empty' <<<"$pane_json")
-        command=$(jq -r '.command // empty' <<<"$pane_json")
-        pane_workdir_raw=$(jq -r '.workdir // empty' <<<"$pane_json")
-        source_files_count=$(jq '.["source-file"] | length // 0' <<<"$pane_json")
-        workdir="$win_workdir"
-        if [ -n "$pane_workdir_raw" ]; then
-          workdir=$(resolve_workdir "$pane_workdir_raw")
-        elif [ "$source_files_count" -gt 0 ]; then
-          first_source=$(jq -r '.["source-file"][0]' <<<"$pane_json")
-          if [[ "$first_source" = /* ]]; then
-            workdir=$(dirname "$first_source")
-          else
-            workdir="$PROJECT_DIR/$(dirname "$first_source")"
-          fi
-        fi
+      if [[ $panes_count -ne 0 ]]; then
+          jq -c '.panes[]' <<<"$win_json" | nl -ba -v0 | while read -r pidx pane_line; do
+            pane_json=$(cut -f2- <<<"$pane_line")
+            pane_name=$(jq -r '.name // empty' <<<"$pane_json")
+            pane_name=${pane_name:-pane_$pidx}
+            position=$(jq -r '.position // empty' <<<"$pane_json")
+            command=$(jq -r '.command // empty' <<<"$pane_json")
+            pane_workdir_raw=$(jq -r '.workdir // empty' <<<"$pane_json")
+            source_files_count=$(jq '.["source-file"] | length // 0' <<<"$pane_json")
+            workdir="$win_workdir"
+            if [ -n "$pane_workdir_raw" ]; then
+              workdir=$(resolve_workdir "$pane_workdir_raw")
+            elif [ "$source_files_count" -gt 0 ]; then
+              first_source=$(jq -r '.["source-file"][0]' <<<"$pane_json")
+              if [[ "$first_source" = /* ]]; then
+                workdir=$(dirname "$first_source")
+              else
+                workdir="$PROJECT_DIR/$(dirname "$first_source")"
+              fi
+            fi
 
-        if [ "$first" -eq 1 ]; then
-          target="${session_name}:${win_name}.0"
-          if [ -n "$command" ]; then
-            tmux send-keys -t "$target" "cd \"$workdir\" && ${command}" C-m
-          else
-            tmux send-keys -t "$target" "cd \"$workdir\"" C-m
-          fi
-          first=0
-        else
-          flag=$(split_flag "$position")
-          if [ -n "$command" ]; then
-            tmux split-window $flag -t "${session_name}:${win_name}" "bash -lc 'cd \"${workdir}\" && ${command}'" >/dev/null
-          else
-            tmux split-window $flag -t "${session_name}:${win_name}" "bash -lc 'cd \"${workdir}\"; exec \$SHELL'" >/dev/null
-          fi
-        fi
-      done
+
+            if [ "$first" -eq 1 ]; then
+              target="${session_name}:${win_name}.0"
+              if [ -n "$command" ]; then
+                tmux send-keys -t "$target" "cd \"$workdir\" && ${command}" C-m
+              else
+                tmux send-keys -t "$target" "cd \"$workdir\"" C-m
+              fi
+              first=0
+            else
+              flag=$(split_flag "$position")
+              if [ -n "$command" ]; then
+                tmux split-window $flag -t "${session_name}:${win_name}" "bash -lc 'cd \"${workdir}\" && ${command}'" >/dev/null
+              else
+                tmux split-window $flag -t "${session_name}:${win_name}" "bash -lc 'cd \"${workdir}\"; exec \$SHELL'" >/dev/null
+              fi
+            fi
+          done
+      fi
 
       tmux select-layout -t "${session_name}:${win_name}" tiled >/dev/null 2>&1 || true
     done
