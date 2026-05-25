@@ -30,6 +30,17 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
 })
 
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = { "sh", "bash" },
+    callback = function()
+        vim.api.nvim_create_autocmd('BufWritePre', {
+            callback = function()
+                vim.cmd("silent %!shfmt -i 4")
+            end
+        })
+    end
+})
+
 vim.api.nvim_create_autocmd("FileType", {
     group = vim.api.nvim_create_augroup("NativeTreesitter", { clear = true }),
     callback = function(args)
