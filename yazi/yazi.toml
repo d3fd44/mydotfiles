@@ -1,0 +1,9 @@
+[mgr]
+ratio = [0, 1, 2]
+sort_by = "natural"
+
+[preview]
+tab_size = 4
+max_width = 1600
+max_height = 1600
+
