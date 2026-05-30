@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+TMUXIFY_DEFAULT_SHELL="${TMUXIFY_DEFAULT_SHELL:-${SHELL:-bash}}"
+
 getabspath() {
     dir="$1"
     [ -z "$dir" ] && dir="."
@@ -57,6 +59,32 @@ launch() {
         fi
     }
 
+    shell_quote() {
+        printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"
+    }
+
+    resolve_shell() {
+        local shell_value="$1"
+        if [ -n "$shell_value" ]; then
+            printf '%s' "$shell_value"
+        else
+            printf '%s' "$TMUXIFY_DEFAULT_SHELL"
+        fi
+    }
+
+    send_pane_startup() {
+        local target="$1"
+        local workdir="$2"
+        local command="$3"
+        local startup_cmd="cd -- $(shell_quote "$workdir")"
+
+        if [ -n "$command" ]; then
+            startup_cmd="${startup_cmd} && ${command}"
+        fi
+
+        tmux send-keys -t "$target" "$startup_cmd" C-m
+    }
+
     jq -c '.sessions[]' "$file" | while read -r session_json; do
         session_name=$(jq -r '.name // empty' <<<"$session_json")
         [ -z "$session_name" ] && session_name="session_$(date +%s%N)"
@@ -75,13 +103,16 @@ launch() {
 
             panes_count=$(jq '.panes | length // 0' <<<"$win_json")
             win_command=$(jq -r '.command // empty' <<<"$win_json")
+            win_shell_raw=$(jq -r '.shell // empty' <<<"$win_json")
+            win_shell=$(resolve_shell "$win_shell_raw")
 
             if [ "$panes_count" -eq 0 ] && [ -n "$win_command" ]; then
-                tmux new-window -d -t "${session_name}" -n "$win_name" "bash -lc 'cd \"${win_workdir}\" && ${win_command}'"
+                target=$(tmux new-window -d -P -F '#{pane_id}' -t "${session_name}" -n "$win_name" "$win_shell")
+                send_pane_startup "$target" "$win_workdir" "$win_command"
                 continue
             fi
 
-            tmux new-window -d -t "${session_name}" -n "$win_name" "bash" >/dev/null
+            target=$(tmux new-window -d -P -F '#{pane_id}' -t "${session_name}" -n "$win_name" "$win_shell")
 
             first=1
             if [[ $panes_count -ne 0 ]]; then
@@ -92,6 +123,8 @@ launch() {
                     split=$(jq -r '.split // empty' <<<"$pane_json")
                     command=$(jq -r '.command // empty' <<<"$pane_json")
                     pane_workdir_raw=$(jq -r '.workdir // empty' <<<"$pane_json")
+                    pane_shell_raw=$(jq -r '.shell // empty' <<<"$pane_json")
+                    pane_shell=$(resolve_shell "${pane_shell_raw:-$win_shell}")
                     source_files_count=$(jq '.["source-file"] | length // 0' <<<"$pane_json")
                     workdir="$win_workdir"
                     if [ -n "$pane_workdir_raw" ]; then
@@ -106,20 +139,12 @@ launch() {
                     fi
 
                     if [ "$first" -eq 1 ]; then
-                        target="${session_name}:${win_name}.1" # i have `pane-base-index` set to 1
-                        if [ -n "$command" ]; then
-                            tmux send-keys -t "$target" "cd \"$workdir\" && ${command}" C-m
-                        else
-                            tmux send-keys -t "$target" "cd \"$workdir\"" C-m
-                        fi
+                        send_pane_startup "$target" "$workdir" "$command"
                         first=0
                     else
                         flag=$(split_flag "$split")
-                        if [ -n "$command" ]; then
-                            tmux split-window $flag -t "${session_name}:${win_name}" "bash -lc 'cd \"${workdir}\" && ${command}'" >/dev/null
-                        else
-                            tmux split-window $flag -t "${session_name}:${win_name}" "bash -lc 'cd \"${workdir}\"; exec \$SHELL'" >/dev/null
-                        fi
+                        target=$(tmux split-window $flag -d -P -F '#{pane_id}' -t "${session_name}:${win_name}" "$pane_shell")
+                        send_pane_startup "$target" "$workdir" "$command"
                     fi
                 done
             fi
@@ -127,10 +152,10 @@ launch() {
             tmux select-layout -t "${session_name}:${win_name}" tiled >/dev/null 2>&1 || true
         done
 
-        if tmux list-windows -t "$session_name" 2>/dev/null | grep -q '^tmuxify'; then
+        if tmux list-windows -t "$session_name" -F '#W' 2>/dev/null | grep -qx 'tmuxify'; then
             count=$(tmux list-windows -t "$session_name" 2>/dev/null | wc -l)
             if [ "$count" -gt 1 ]; then
-                tmux kill-window -t "${session_name}::tmuxify" >/dev/null 2>&1 || true
+                tmux kill-window -t "${session_name}:tmuxify" >/dev/null 2>&1 || true
             else
                 first_window_name=$(tmux list-windows -t "$session_name" -F '#W' | head -n1)
                 tmux rename-window -t "${session_name}" "$first_window_name" >/dev/null 2>&1 || true
