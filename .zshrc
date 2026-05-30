@@ -7,7 +7,6 @@ alias        bat="bat --color always --style='numbers,grid,changes' --theme=Drac
 alias         ls="ls -l --color=auto -v --group-directories-first -1"
 alias         pq="sudo pacman -Q --color never"
 alias     pacman="sudo pacman --color always"
-alias       glog="git log --oneline --graph"
 alias       grep="grep --color=auto"
 alias        mkc="make clean"
 alias         gs="git status"
