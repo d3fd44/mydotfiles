@@ -61,11 +61,4 @@ getrandhex() {
 }
 
 
-if [ -r "$HOME/.tmuxify" ]; then
-    source "$HOME/.tmuxify"
-else
-    printf '\033[0;33mwarning:\033[0m %s does not exist\n' "$HOME/.tmuxify" >&2
-fi
-
-
 echo && date && echo
