@@ -12,7 +12,6 @@ vim.pack.add({
         version = vim.version.range('^9')
     },
     { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
-    { src = 'https://github.com/nvim-lualine/lualine.nvim' },
     { src = "https://github.com/folke/tokyonight.nvim" },
     { src = "https://github.com/EdenEast/nightfox.nvim" },
 })

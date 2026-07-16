@@ -62,3 +62,6 @@ getrandhex() {
 
 
 echo && date && echo
+
+# Added by Antigravity CLI installer
+export PATH="/home/momen/.local/bin:$PATH"
