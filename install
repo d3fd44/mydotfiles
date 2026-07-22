@@ -15,14 +15,14 @@ if [ -r "$REPO_DIR/.ignore" ]; then
         [ -z "$line" ] && continue
 
         IGNORES+=("$line")
-    done < "$REPO_DIR/.ignore"
+    done <"$REPO_DIR/.ignore"
 fi
 
 should_ignore() {
     local name="$1"
     for pat in "${IGNORES[@]}"; do
         case "$name" in
-            $pat) return 0 ;;
+        $pat) return 0 ;;
         esac
     done
     return 1
@@ -33,8 +33,8 @@ overwrite() {
     printf "'%s' exists. overwrite? (y/N) " "$target"
     read -r ans
     case "$ans" in
-        y|Y) return 0 ;;
-        *) return 1 ;;
+    y | Y) return 0 ;;
+    *) return 1 ;;
     esac
 }
 
@@ -56,13 +56,13 @@ link_item() {
     printf "linked: %s -> %s\n" "$dst" "$src"
 }
 
-
 for f in "$REPO_DIR"/*; do
     [ -e "$f" ] || continue
 
     name=${f#$REPO_DIR/}
     should_ignore "$name" && continue
 
+    [ -f "$f" ] && [ $name == "init.el" ] && link_item "$f" "$HOME/.config/emacs/$name" && continue
     [ -f "$f" ] && link_item "$f" "$HOME/$name"
     [ -d "$f" ] && link_item "$f" "$HOME/.config/$name"
 done
