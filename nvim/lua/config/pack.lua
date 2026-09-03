@@ -13,7 +13,6 @@ vim.pack.add({
     },
     { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
     { src = "https://github.com/folke/tokyonight.nvim" },
-    { src = "https://github.com/EdenEast/nightfox.nvim" },
 })
 
 local function load_plugins()
