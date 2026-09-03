@@ -62,7 +62,6 @@ for f in "$REPO_DIR"/*; do
     name=${f#$REPO_DIR/}
     should_ignore "$name" && continue
 
-    [ -f "$f" ] && [ $name == "init.el" ] && link_item "$f" "$HOME/.config/emacs/$name" && continue
     [ -f "$f" ] && link_item "$f" "$HOME/$name"
     [ -d "$f" ] && link_item "$f" "$HOME/.config/$name"
 done
