@@ -6,12 +6,6 @@ vim.keymap.set("i", "<C-u>", "<nop>", { noremap = true })
 vim.keymap.set("n", "U", "<nop>", { noremap = true })
 
 vim.keymap.set("n", "<Esc>", ":nohl<CR>")
-vim.keymap.set("i", "<C-h>", "<left>", { noremap = true })
-vim.keymap.set("i", "<C-j>", "<down>", { noremap = true })
-vim.keymap.set("i", "<C-k>", "<up>", { noremap = true })
-vim.keymap.set("i", "<C-l>", "<right>", { noremap = true })
-vim.keymap.set("i", "<C-b>", "<C-o>b", { noremap = true })
-vim.keymap.set("i", "<C-f>", "<C-o>w", { noremap = true })
 
 vim.keymap.set("n", "<A-]>", "<cmd>bnext<CR>")
 vim.keymap.set("n", "<A-[>", "<cmd>bprevious<CR>")
@@ -29,7 +23,7 @@ vim.api.nvim_set_keymap("n", "<C-q>", "", {
         local s = pcall(function() vim.cmd("close") end) -- close window
         if not s then
             s = pcall(function() vim.cmd("bd") end)      -- last window? close buffer
-            if not s then print("Unsaved Buffer, use 'bd!' to force quit") end
+            if not s then print("unsaved buffer, use 'bd!' to force quit") end
         end
     end,
 })
