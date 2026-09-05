@@ -2,7 +2,6 @@ vim9script
 
 g:mapleader = " "
 
-## Options
 set number
 set relativenumber
 set cursorline
@@ -28,7 +27,6 @@ augroup END
 
 
 
-## Custom Operators
 def SetOp(op: string, mode: string): string
     if (op == "surround")
         &operatorfunc = function('SurroundOp', [mode, v:count1])
@@ -71,13 +69,9 @@ def AlignTrailing(): void
     endfor
 enddef
 
-
-## Mappings
 map       Y         y$
 nnoremap <Leader>e :Ex<CR>
 nnoremap <C-q>     :bd<CR>
-nnoremap n       :bnext<CR> " <A-n>
-nnoremap p       :bprev<CR> " <A-p>
 nnoremap <Esc>     :nohl<CR>
 nnoremap <expr> gs  SetOp("surround", 'n') .. '<Esc>g@'
 xnoremap <expr> gs  SetOp("surround", 'v')
@@ -85,7 +79,6 @@ xnoremap  a         <ScriptCmd>AlignTrailing()<CR>
 
 
 
-## Colors
 augroup highlightYankedText
     autocmd!
     autocmd TextYankPost * {
