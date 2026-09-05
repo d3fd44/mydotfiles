@@ -6,7 +6,6 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.scrolloff = 4
 vim.opt.laststatus = 0
-vim.opt.showcmdloc = 'statusline'
 vim.opt.expandtab = true
 vim.opt.autoindent = true
 vim.opt.breakindent = true
