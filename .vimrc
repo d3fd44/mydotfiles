@@ -49,7 +49,7 @@ def SurroundOp(mode: string, count: number, type: any): void
     execute $"normal! {rhcmd}\<Esc>{lhcmd}\<Esc>"
 enddef
 
-def Align(): void
+def AlignTrailing(): void
     execute "normal \<Esc>"
 
     var block = getline("'<", "'>")
@@ -66,7 +66,7 @@ def Align(): void
     for i in getline("'<", "'>")
         execute "normal! g_"
         var pad = max - getcursorcharpos()[2]
-        if pad <= 1 | execute "normal! j" | continue | endif
+        if pad < 1 | execute "normal! j" | continue | endif
         execute $"normal! {pad}i \<Esc>j"
     endfor
 enddef
@@ -81,7 +81,7 @@ nnoremap p       :bprev<CR> " <A-p>
 nnoremap <Esc>     :nohl<CR>
 nnoremap <expr> gs  SetOp("surround", 'n') .. '<Esc>g@'
 xnoremap <expr> gs  SetOp("surround", 'v')
-xnoremap  a         <ScriptCmd>Align()<CR>
+xnoremap  a         <ScriptCmd>AlignTrailing()<CR>
 
 
 
