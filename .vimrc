@@ -19,112 +19,17 @@ set clipboard=unnamedplus
 set mouse=a
 set background=dark
 set termguicolors
+set ttimeout ttimeoutlen=5  # bc vim sucks inside tmux (delays forever after pressing <ESC>)
 
-augroup filetypeRelatedActions
+nnoremap <Leader>e <CMD>Ex<CR>
+nnoremap <C-q>     <CMD>bd<CR>
+nnoremap <ESC>     <CMD>nohlsearch<CR>
+
+augroup rmbg
     autocmd!
-    autocmd FileType make setlocal noexpandtab
+    autocmd ColorScheme * highlight Normal guibg=NONE ctermbg=NONE
 augroup END
 
-
-
-def SetOp(op: string, mode: string): string
-    if (op == "surround")
-        &operatorfunc = function('SurroundOp', [mode, v:count1])
-    endif
-    return 'g@'
-enddef
-
-def SurroundOp(mode: string, count: number, type: any): void
-    echo "Enter surround char..."
-    var lhc = nr2char(getchar())
-
-    if lhc == nr2char(27) | return | endif
-
-    var rhc = {'(': ')', '{': '}', '[': ']', '<': '>'}->get(lhc, lhc)
-    var lhcmd = $"`t{type == 'line' ? "^i" : "i"}{repeat(lhc, count)}"
-    var rhcmd = $"{mode == 'n' ? '`[mt`]' : '`<mt`>'}{type == 'line' ? "g_a" : "a"}{repeat(rhc, count)}"
-
-    execute $"normal! {rhcmd}\<Esc>{lhcmd}\<Esc>"
-enddef
-
-def AlignTrailing(): void
-    execute "normal \<Esc>"
-
-    var block = getline("'<", "'>")
-    var max = 0
-    for line in block
-        var last = line[len(line) - 1]
-        if last != '\' | echo "the selected lines does not end with a backslash" | return | endif
-        if strlen(line) > max
-            max = strlen(line)
-        endif
-    endfor
-
-    execute "normal! '<"
-    for i in getline("'<", "'>")
-        execute "normal! g_"
-        var pad = max - getcursorcharpos()[2]
-        if pad < 1 | execute "normal! j" | continue | endif
-        execute $"normal! {pad}i \<Esc>j"
-    endfor
-enddef
-
-map       Y         y$
-nnoremap <Leader>e :Ex<CR>
-nnoremap <C-q>     :bd<CR>
-nnoremap <Esc>     :nohl<CR>
-nnoremap <expr> gs  SetOp("surround", 'n') .. '<Esc>g@'
-xnoremap <expr> gs  SetOp("surround", 'v')
-xnoremap  a         <ScriptCmd>AlignTrailing()<CR>
-
-
-
-augroup highlightYankedText
-    autocmd!
-    autocmd TextYankPost * {
-        if (v:event['operator'] == 'y')
-            call FlashYankedText()
-        endif
-    }
-augroup END
-
-augroup preserveColors
-    autocmd!
-    autocmd ColorScheme * highlight FlashYank guifg=black guibg=#4cffd0
-augroup END
-
-
-def FlashYankedText(): void
-    if (!exists('g:yankedTextMatches'))
-        g:yankedTextMatches = []
-    endif
-
-    var matchId = matchadd('FlashYank', ".\\%>'\\[\\_.*\\%<']..")
-    var windowId = winnr()
-
-    call add(g:yankedTextMatches, [windowId, matchId])
-    call timer_start(150, 'DeleteTemporaryMatch')
-enddef
-
-def DeleteTemporaryMatch(timerId: number): void
-     while !empty(g:yankedTextMatches)
-        var match = remove(g:yankedTextMatches, 0)
-        var windowID = match[0]
-        var matchID = match[1]
-        try
-            call matchdelete(matchID, windowID)
-        catch
-            echo "invalid matchID!"
-        endtry
-    endwhile
-enddef
-
-call plug#begin()
-Plug 'ghifarit53/tokyonight-vim'
-call plug#end()
-
-g:tokyonight_style = 'night'
-g:tokyonight_enable_italic = 1
-colorscheme tokyonight
+colorscheme catppuccin
 
 syntax on
